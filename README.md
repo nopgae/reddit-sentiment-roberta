@@ -1,26 +1,26 @@
 # Reddit Sentiment Analysis with RoBERTa
 
-End-to-end NLP pipeline for classifying Reddit post sentiment using a pre-trained RoBERTa transformer model. Analyzes discussions across **e-commerce, Korean tech, logistics, and investing** subreddits — topics directly relevant to supply chain and data science roles.
+End-to-end NLP pipeline that classifies sentiment of **563 real Reddit posts** using a pre-trained RoBERTa transformer. Covers e-commerce, Korean tech, logistics, supply chain, and investing discussions — directly relevant to data science and SCM roles.
 
 ## Tech Stack
 
 - **Model:** `cardiffnlp/twitter-roberta-base-sentiment-latest` (RoBERTa-base fine-tuned on 124M tweets)
 - **Framework:** PyTorch + Hugging Face Transformers
-- **Data collection:** PRAW (Reddit API wrapper)
+- **Data collection:** Reddit public JSON API (no credentials) + PRAW (optional)
 - **Analysis & Visualization:** pandas, Plotly
 
 ## Pipeline
 
 ```
-Reddit API (PRAW)
-      ↓
-Raw Posts CSV
-      ↓
-Text Preprocessing   ← strip markdown, URLs, mentions
-      ↓
-RoBERTa Inference    ← Positive / Neutral / Negative + confidence score
-      ↓
-Analysis & Plots     ← distribution, trends, keywords, score correlation
+Reddit JSON API (no auth required)
+           ↓
+  563 real posts across 7 subreddits
+           ↓
+  Text Preprocessing   ← strip markdown, URLs, user mentions
+           ↓
+  RoBERTa Inference    ← Positive / Neutral / Negative + confidence score
+           ↓
+  Analysis & Plots     ← distribution, subreddit comparison, trends, keywords
 ```
 
 ## Project Structure
@@ -28,72 +28,84 @@ Analysis & Plots     ← distribution, trends, keywords, score correlation
 ```
 .
 ├── reddit_sentiment_roberta.ipynb   # Main analysis notebook
-├── collect_data.py                  # PRAW data collection script
+├── collect_data.py                  # Data collection (JSON API + PRAW)
 ├── data/
-│   └── sample_posts.csv            # 50 curated posts (runs without API credentials)
+│   ├── real_reddit_posts.csv       # 563 real posts with RoBERTa labels
+│   └── sample_posts.csv            # 50-post fallback (offline use)
 ├── requirements.txt
 └── README.md
 ```
 
-## Quick Start (no API key needed)
+## Quick Start
 
 ```bash
 pip install -r requirements.txt
 jupyter notebook reddit_sentiment_roberta.ipynb
 ```
 
-The notebook runs on `data/sample_posts.csv` by default — 50 posts across 5 subreddits with realistic e-commerce/tech discussions.
+Runs on `data/real_reddit_posts.csv` — 563 actual Reddit posts already labeled by RoBERTa. No API key needed to view analysis.
 
-## Collecting Live Reddit Data
+## Re-collecting Fresh Data
 
 ```bash
-# 1. Get Reddit API credentials at https://www.reddit.com/prefs/apps
-export REDDIT_CLIENT_ID=your_client_id
-export REDDIT_CLIENT_SECRET=your_client_secret
+# No credentials required (Reddit public JSON API)
+python collect_data.py
 
-# 2. Collect posts
-python collect_data.py   # saves to data/reddit_posts.csv
-
-# 3. In the notebook, change DATA_PATH to 'data/reddit_posts.csv'
+# With PRAW (more posts, full search capability)
+export REDDIT_CLIENT_ID=your_id
+export REDDIT_CLIENT_SECRET=your_secret
+python collect_data.py --praw
 ```
 
 ## Analyses Included
 
 | Section | What it shows |
 |---|---|
-| Sentiment Distribution | Overall Positive / Neutral / Negative breakdown (donut chart) |
-| By Subreddit | Stacked bar — which communities are most positive/negative |
-| Temporal Trend | Weekly sentiment counts + 7-post rolling mean sentiment score |
-| Top Posts | Highest-scored posts by sentiment class |
-| Confidence Analysis | Box plot of model certainty per class |
-| Score vs Sentiment | Scatter — Reddit upvotes vs model confidence vs comment volume |
-| Keyword Analysis | Most frequent words per sentiment class (bar charts) |
+| Sentiment Distribution | Overall Positive / Neutral / Negative donut chart |
+| By Subreddit | Stacked bar — which communities skew most positive/negative |
+| Temporal Trend | Weekly sentiment counts + 7-post rolling mean score |
+| Top Posts | Highest-upvoted posts per sentiment class |
+| Confidence Analysis | Box plot — model certainty per class |
+| Score vs Sentiment | Scatter — Reddit upvotes × confidence × comment volume |
+| Keyword Analysis | Most frequent words per sentiment class |
 
-## Sample Results (50 posts)
+## Results (563 real posts)
 
 ```
-positive :  23 posts (46%)  avg confidence = 0.811
-negative :  18 posts (36%)  avg confidence = 0.835
-neutral  :   9 posts (18%)  avg confidence = 0.561
+neutral  : 267 posts (47.4%)  avg confidence = 0.681
+negative : 188 posts (33.4%)  avg confidence = 0.683
+positive : 108 posts (19.2%)  avg confidence = 0.748
 
-Overall sentiment score: +0.10 (slightly positive)
-Most positive subreddit: r/technology
-Most negative subreddit: r/ecommerce
+Overall sentiment score : -0.142 (slightly negative — realistic for complaint-heavy subs)
+Most positive subreddit : r/supplychain
+Most negative subreddit : r/ecommerce
 ```
 
-## Why RoBERTa for Reddit?
+## Dataset
+
+| Subreddit | Posts | Topic |
+|---|---|---|
+| r/ecommerce | 99 | Online retail, platforms, fulfillment |
+| r/investing | 100 | Markets, stocks, macro |
+| r/MachineLearning | 98 | AI/ML research and industry |
+| r/startups | 100 | Entrepreneurship, funding, growth |
+| r/supplychain | 74 | Logistics, procurement, operations |
+| r/korea | 54 | Korean society, economy, tech |
+| r/logistics | 38 | Last-mile, warehousing, transport |
+
+## Why RoBERTa?
 
 - Twitter-trained RoBERTa generalizes well to Reddit — both are short, opinionated social media text
-- 3-class labels (Positive / Neutral / Negative) are more informative than binary for nuanced discussions
-- Confidence scores enable filtering low-certainty predictions for downstream use
+- 3-class output (Positive / Neutral / Negative) captures nuance better than binary sentiment
+- Confidence scores enable filtering uncertain predictions for downstream use
 
 ## Relevance to Data Science / SCM Roles
 
-- **Customer sentiment monitoring** — product reviews, brand perception tracking in e-commerce
-- **Demand signal extraction** — sentiment on product categories as a leading indicator
-- **NLP pipeline design** — preprocessing → inference → aggregation pattern used in production systems
-- **Transformer model deployment** — loading, batching, and serving HuggingFace models efficiently
+- **Customer sentiment monitoring** — product and brand perception in e-commerce pipelines
+- **Demand signal extraction** — community sentiment as a leading indicator for inventory planning
+- **NLP pipeline design** — preprocessing → batched inference → aggregation pattern used in production
+- **Transformer deployment** — efficient batching and serving of HuggingFace models
 
 ---
 
-*Subreddits: r/ecommerce · r/korea · r/technology · r/logistics · r/investing*
+*Data collected via Reddit public JSON API · Model: cardiffnlp/twitter-roberta-base-sentiment-latest*
