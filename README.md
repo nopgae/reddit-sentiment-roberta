@@ -32,6 +32,10 @@ Reddit JSON API (no auth required)
 ├── data/
 │   ├── real_reddit_posts.csv       # 563 real posts with RoBERTa labels
 │   └── sample_posts.csv            # 50-post fallback (offline use)
+├── images/
+│   ├── sentiment_distribution.png   # Donut chart — overall sentiment
+│   ├── sentiment_by_subreddit.png   # Stacked bar by subreddit
+│   └── confidence_by_sentiment.png  # Box plot — model confidence
 ├── requirements.txt
 └── README.md
 ```
@@ -105,6 +109,20 @@ Most negative subreddit : r/ecommerce
 - **Demand signal extraction** — community sentiment as a leading indicator for inventory planning
 - **NLP pipeline design** — preprocessing → batched inference → aggregation pattern used in production
 - **Transformer deployment** — efficient batching and serving of HuggingFace models
+
+## Visualizations
+
+### Sentiment Distribution
+![Sentiment Distribution](images/sentiment_distribution.png)
+*Overall distribution across 563 posts — Neutral 47.4%, Negative 33.4%, Positive 19.2% · avg sentiment score: −0.142*
+
+### Sentiment by Subreddit
+![Sentiment by Subreddit](images/sentiment_by_subreddit.png)
+*r/supplychain most positive (+0.11), r/ecommerce most negative (−0.31) — consistent with complaint-heavy e-commerce discussion*
+
+### Model Confidence by Sentiment Class
+![Model Confidence](images/confidence_by_sentiment.png)
+*Positive predictions made with highest confidence (μ=0.748) — model is more certain when text is clearly upbeat*
 
 ---
 
